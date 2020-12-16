@@ -6,11 +6,14 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 
 public class GetTable {
+    private static final String PARENT_DIR = "/Users/falker/Documents/Projects/skyserver/data/";
+
     public static String getPathToSave(String table, int counter) {
-        return "/home/hamid/skyTable/" + table + "/" + counter + ".csv";
+        return PARENT_DIR + table + "/" + counter + ".csv";
     }
 
     public static void main(String[] args) throws IOException {
+        System.out.println("Starting GetTable...");
         String GET_URL = "http://skyserver.sdss.org/dr16/en/tools/search/x_results.aspx?searchtool=SQL&TaskName=Skyserver.Search.SQL&syntax=NoSyntax&ReturnHtml=true&";
         ArrayList<String> tableNames = new ArrayList<String>();
         //    tableNames.add("PhotoObjAll"); //101
@@ -48,6 +51,18 @@ public class GetTable {
         //counter<11000=>10999
         //counter<13000=>12999
         //counter<14000=>13999
+
+
+        // Create directories if needed
+
+        tableNames.forEach(dir -> {
+            File directory = new File(PARENT_DIR + dir);
+            if (!directory.exists()){
+                System.out.println("Creating new directory " + dir);
+                directory.mkdir();
+            }
+        });
+
         for (int counter = 14000; counter <= 14000; counter++) {
             for (int i = 0; i < tableNames.size(); i++) {
                 String PARAMS = "cmd=SELECT+*+FROM+" + tableNames.get(i) + "+WHERE+objID+%25+99999>12999+and+objID+%25+99999<" + counter + "&format=csv&tableName=";
@@ -71,11 +86,12 @@ public class GetTable {
                 //PARAMS="cmd=SELECT+*+FROM+" + tableNames.get(i) + "+WHERE+cntr+%25+99999=" + counter + "&format=csv&tableName=";
 
                 URL url = new URL(GET_URL + PARAMS);
+                System.out.println("Requesting url:" + url);
                 URLConnection con2 = url.openConnection();
                 InputStream is = con2.getInputStream();
 
                 BufferedReader br = new BufferedReader(new InputStreamReader(is));
-
+                System.out.println("Writing to disk...");
                 String line = null;
                 File file = new File(getPathToSave(tableNames.get(i), counter));
                 Files.deleteIfExists(file.toPath());
